@@ -70,7 +70,7 @@ for i in mod_keys:
             print(j)
             pro = j.split('_')
             print(i)
-            file = glob.glob(os.path.join(data_prod_location,j,'*'+'.csv'))[0]
+            file = glob.glob(os.path.join(data_prod_location,j,'*'+i+'.csv'))[0]
             prod_data = pd.read_table(file,delimiter=',')
             print(prod_data)
             year = np.array(prod_data['# Year'])
@@ -127,12 +127,19 @@ for i in mod_keys:
     var = out.createVariable('ice','f4',('time','lat','lon'))
     var[:] = lon_switch(np.transpose(np.array(c['ice']),[2,1,0]))
     var.Long_name = 'Ice coverage'
+    var.dataset = 'Model ice'
 
     var = out.createVariable('wind','f4',('time','lat','lon'))
-    var[:] = lon_switch(np.transpose(np.array(c['ERA5_si10']),[2,1,0]))
+    var[:] = lon_switch(np.transpose(np.array(c['ERA5_ws']),[2,1,0]))
     var.Long_name = 'Wind speed'
     var.Units = 'ms-1'
-    var.dataset = 'ERA5'
+    var.dataset = 'ERA5 Hourly'
+
+    var = out.createVariable('wind^2','f4',('time','lat','lon'))
+    var[:] = lon_switch(np.transpose(np.array(c['ERA5_ws2']),[2,1,0]))
+    var.Long_name = 'Second moment wind speed'
+    var.Units = '(ms-1)^2'
+    var.dataset = 'ERA5 Hourly'
 
     var = out.createVariable('tos','f4',('time','lat','lon'))
     var[:] = lon_switch(np.transpose(np.array(c['model_tos']),[2,1,0]))
@@ -152,10 +159,16 @@ for i in mod_keys:
     var.Units = 'uatm'
 
     var = out.createVariable('xco2atm','f4',('time','lat','lon'))
-    var[:] = lon_switch(np.transpose(np.array(c['NOAA_ERSL_xCO2']),[2,1,0]))
+    var[:] = lon_switch(np.transpose(np.array(c['GCB_xCO2']),[2,1,0]))
     var.Long_name = 'Atmospheric xCO2'
     var.Units = 'ppm'
     var.dataset = 'GCB provide xCO2atm (global average monthly)'
+
+    var = out.createVariable('fco2atm','f4',('time','lat','lon'))
+    var[:] = lon_switch(np.transpose(np.array(c['atm_fco2']),[2,1,0]))
+    var.Long_name = 'Fugacity of CO2 in atmosphere'
+    var.Units = 'uatm'
+    var.dataset = 'GCB provide xCO2atm (global average monthly) converted to fCO2atm with ERA5 sea level pressure'
 
     var = out.createVariable('model_flux','f4',('time','lat','lon'))
     var[:] = lon_switch(np.transpose(np.array(c['flux']),[2,1,0]))
@@ -175,6 +188,30 @@ for i in mod_keys:
     var.Long_name = 'Fractional coverage of ocean in each grid tile'
     var.Units = ''
     var.description = 'This is the ocean proportion mask calculated from GEBCO2023 data. '
+
+    var = out.createVariable('model_dfco2','f4',('time','lat','lon'))
+    var[:] = lon_switch(np.transpose(np.array(c['dfCO2']),[2,1,0]))
+    var.Long_name = 'Model delta fCO2'
+    var.Units = 'uatm'
+    var.direction = '-ve indicates seawater is less than atmospheric fCO2'
+
+    var = out.createVariable('schmidt','f4',('time','lat','lon'))
+    var[:] = lon_switch(np.transpose(np.array(c['schmidt']),[2,1,0]))
+    var.Long_name = 'Schmidt number for air-sea CO2 flux calculation'
+    var.Units = 'unitless'
+    var.description = 'Calculated from model temperature'
+
+    var = out.createVariable('solubility','f4',('time','lat','lon'))
+    var[:] = lon_switch(np.transpose(np.array(c['schmidt']),[2,1,0]))
+    var.Long_name = 'Solubility for air-sea CO2 flux calculation'
+    var.Units = 'mol L-1 atm-1'
+    var.description = 'Calculated from model temperature and salinity'
+
+    var = out.createVariable('gas_transfer','f4',('time','lat','lon'))
+    var[:] = lon_switch(np.transpose(np.array(c['k']),[2,1,0]))
+    var.Long_name = 'Gas transfer coefficient'
+    var.Units = 'cm hr-1'
+    var.description = 'Calculated from ERA5 winds using a = 0.271'
     c.close()
 
     for j in data_folds:
@@ -185,10 +222,12 @@ for i in mod_keys:
 
             flux = np.zeros((len(time),len(lat),len(lon))); flux[:] = np.nan
             sfco2 = np.copy(flux)
+            dfco2 = np.copy(flux)
             f = np.where(time2[0] == time)[0][0]
             print(f)
             flux[f:,:,:] = lon_switch(np.transpose(np.array(c['flux']),[2,1,0]))
             sfco2[f:,:,:] = lon_switch(np.transpose(np.array(c['model_sfco2']),[2,1,0]))
+            dfco2[f:,:,:] = lon_switch(np.transpose(np.array(c['dfCO2']),[2,1,0]))
             var = out.createVariable(pro[0]+'_flux','f4',('time','lat','lon'))
             var[:] = flux
             var.Long_name = pro[0]+' Air-sea CO2 flux'
@@ -199,6 +238,12 @@ for i in mod_keys:
             var = out.createVariable(pro[0]+'_sfco2','f4',('time','lat','lon'))
             var[:] = sfco2
             var.Long_name = pro[0]+' surface ocean fCO2'
+            var.Units = 'uatm'
+            var.data_from = os.path.join(data_prod_location,j,j+'.nc')
+
+            var = out.createVariable(pro[0]+'_dfco2','f4',('time','lat','lon'))
+            var[:] = dfco2
+            var.Long_name = pro[0]+' delta fCO2'
             var.Units = 'uatm'
             var.data_from = os.path.join(data_prod_location,j,j+'.nc')
 

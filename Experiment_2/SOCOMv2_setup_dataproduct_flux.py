@@ -36,8 +36,9 @@ flux_config = 'C:/Users/df391/OneDrive - University of Exeter/Post_Doc_ESA_Contr
 #Input datasets for the flux that aren't included in the models
 #This should be the same as in SOCOMV2_setup_model_flux.py
 inp_loc = 'E:/SOCOMV2/EX2/flux'
-wind_loc = os.path.join(inp_loc,'si10')
-atm_loc = os.path.join(inp_loc,'xco2atm')
+wind_loc = os.path.join(inp_loc,'ws')
+wind2_loc = os.path.join(inp_loc,'ws2')
+atm_loc = os.path.join(inp_loc,'xCO2')
 msl_loc = os.path.join(inp_loc,'msl')
 output_loc = os.path.join(inp_loc,'data_products')
 
@@ -72,7 +73,7 @@ for prod in g:
     data_file = os.path.join(temp_out_loc,product_name+'_'+model_ref+'.nc')
     #Make the temp folder
     print(du.checkfileexist(temp_out_loc))
-    if (du.checkfileexist(temp_out_loc) == 0) and (force_flux == 0):
+    if (du.checkfileexist(temp_out_loc) == False) | (force_flux == 1):
         du.makefolder(temp_out_loc)
         #Make a folder to output the pCO2 fields from the data products into individual time point netcdf's (i.e one for each month)
         du.makefolder(os.path.join(temp_out_loc,'sfco2'))
@@ -147,9 +148,10 @@ for prod in g:
             ti = ti+1 #Counter
 
         #Now we combine all the data together, with the model tos, sos, and fice fields for the flux calcualtions.
-        cinpvars = [['ERA5','si10',os.path.join(wind_loc,'%Y','%Y_%m*.nc'),0],
+        cinpvars = [['ERA5','ws',os.path.join(wind_loc,'%Y','%Y_%m*.nc'),0],
+        ['ERA5','ws2',os.path.join(wind2_loc,'%Y','%Y_%m*.nc'),0],
         ['ERA5','msl',os.path.join(msl_loc,'%Y','%Y_%m*.nc'),0],
-        ['NOAA_ERSL','xCO2',os.path.join(atm_loc,'%Y','%Y_%m*.nc'),0],
+        ['GCB','xCO2',os.path.join(atm_loc,'%Y_%m*.nc'),0],
         ['model','tos',os.path.join(model_location,mod_dictionary[model_ref],'tos','%Y_%m*.nc'),0],
         ['model','sos',os.path.join(model_location,mod_dictionary[model_ref],'sos','%Y_%m*.nc'),0],
         ['model','sfco2',os.path.join(temp_out_loc,'sfco2','%Y_%m*.nc'),0],
@@ -170,14 +172,14 @@ for prod in g:
         for key in keys:
             direct[key] = np.array(c.variables[key][:])
         c.close()
-        direct['ERA5_si10^2'] = direct['ERA5_si10']**2 # Need a pow2 wind speed for the gas transfer parameterisation (quick and dirty currently)
-        direct['ERA5_si10^3'] = direct['ERA5_si10']**3 # Need a pow3 wind speed for the gas transfer parameterisation (quick and dirty currently)
+        # direct['ERA5_si10^2'] = direct['ERA5_si10']**2 # Need a pow2 wind speed for the gas transfer parameterisation (quick and dirty currently)
+        # direct['ERA5_si10^3'] = direct['ERA5_si10']**3 # Need a pow3 wind speed for the gas transfer parameterisation (quick and dirty currently)
         #Use the OceanICU framework to generate the fluxengine input files :-)
         fl.fluxengine_individual_netcdf(os.path.join(temp_out_loc),direct,log,lag,start_yr = start_yr,end_yr = end_yr)
 
         return_path = os.getcwd() # Path where we are now (the escape back path)
         os.chdir(os.path.join(temp_out_loc)) #Move to the folder we are working in for the data product
-        returnCode, fe = fluxengine.run_fluxengine(flux_config, start_yr, end_yr, singleRun=False,verbose=True) # Run fluxengine
+        returnCode, fe = fluxengine.run_fluxengine(flux_config, start_yr, end_yr, singleRun=False,verbose=True,processLayersOff=True) # Run fluxengine
         #We do this as the config file is setup on relative paths, not absolutes (so we can reuse the same config...)
         os.chdir(return_path)# Return (lets get out of this folder...)
 
@@ -185,10 +187,12 @@ for prod in g:
     print((end_yr-start_yr-1)*12)
     flux = fl.load_flux_var(os.path.join(temp_out_loc,'flux'),'OF',start_yr,end_yr,len(log),len(lag),(end_yr-start_yr+1)*12)
     ice = fl.load_flux_var(os.path.join(temp_out_loc,'flux'),'P1',start_yr,end_yr,len(log),len(lag),(end_yr-start_yr+1)*12)
+    dpco2 = fl.load_flux_var(os.path.join(temp_out_loc,'flux'),'dpCO2',start_yr,end_yr,len(log),len(lag),(end_yr-start_yr+1)*12)
     # Flux engine doesn't apply the ice scaling so we do this manually (same procedure is needed for the FluxEngine budgets tool)
     flux = flux * (1-ice)
     flux = np.transpose(flux,(1,0,2))# Now we transpose so we can save the flux back to data_file (so it can be used later...)
     ice = np.transpose(ice,(1,0,2))
+    dpco2 = np.transpose(dpco2,(1,0,2))
     c = Dataset(data_file,'a')
     keys = c.variables.keys()
     if 'flux' in keys:
@@ -201,6 +205,12 @@ for prod in g:
     else:
         var_o = c.createVariable('ice','f4',('longitude','latitude','time'))
         var_o[:] = ice
+
+    if 'dfCO2' in keys:
+        c.variables['dfCO2'][:] = dpco2
+    else:
+        var_o = c.createVariable('dfCO2','f4',('longitude','latitude','time'))
+        var_o[:] = dpco2
     c.close()
         # Calcualte the annual fluxes using the OceanICU framework :-)
     fl.calc_annual_flux(temp_out_loc,log,lag,start_yr,end_yr,bath_file=os.path.join(inp_loc,'bath.nc'),flux_file = data_file,save_file = os.path.join(temp_out_loc,product_name+'_'+model_ref+'.csv'))

@@ -4,13 +4,14 @@ Created by Daniel J. Ford (d.ford@exeter.ac.uk)
 Date: 06/2024
 
 """
-cols = ['#332288','#44AA99','#882255','#DDCC77', '#117733', '#88CCEE','#999933','#CC6677']
+cols = ['#332288','#44AA99','#882255','#DDCC77', '#117733', '#88CCEE','#999933','#CC6677','#AA4499']
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import datetime
 from matplotlib.gridspec import GridSpec
+import scipy.stats
 
 model_gcb = 'C:/Users/df391/OneDrive - University of Exeter/Post_Doc_ESA_Contract/SOCOMv2/EX2/GCB_model_fluxes.csv'
 
@@ -22,41 +23,47 @@ data = pd.read_table(model_gcb,sep=',')
 head = list(data); head.remove('year')
 #print(head)
 
-# plt.figure(figsize=(7,7))
-# co = 0
-# for t in head:
-#     plt.plot(data['year'],data[t],label=t,color=cols[co])
-#     model_f = os.path.join(model_loc,t,t+'_full.csv')
-#     data2 = pd.read_table(model_f,sep=',')
-#     plt.plot(data2['# Year'],-data2[' Net air-sea CO2 flux (Pg C yr-1)'],color=cols[co],linestyle='--',label=t+' (product)')
-#     co = co+1
-#
-# plt.ylabel('Net air-sea CO$_2$ flux (Pg C yr$^{-1}$; +ve into ocean)')
-# plt.xlabel('Year')
-# plt.title('SOCOMv2 Ex2 - '+datetime.datetime.now().strftime(('%d/%m/%Y %H:%M')))
-# plt.grid()
-# plt.legend()
-# plt.savefig('plots/SOCOMv2_model_flux_comparision.png',format='png',dpi=300)
-#
-#
-# fig = plt.figure(figsize=(10,7))
-# gs = GridSpec(1,1, figure=fig, wspace=0.25,hspace=0.15,bottom=0.1,top=0.95,left=0.1,right=0.72)
-# ax = fig.add_subplot(gs[0,0])
-# co = 0
-# for t in head:
-#     model_f = os.path.join(model_loc,t,t+'_full.csv')
-#     data2 = pd.read_table(model_f,sep=',')
-#     plt.plot(data2['# Year'],-data2['Downward air-sea CO2 flux (Pg C yr-1)'],color=cols[co],label=t+' (ingas)')
-#     plt.plot(data2['# Year'],-data2['Upward air-sea CO2 flux (Pg C yr-1)'],color=cols[co],linestyle='--',label=t+' (outgas)')
-#     co = co+1
-#
-# plt.ylabel('Air-sea CO$_2$ flux (Pg C yr$^{-1}$; +ve into ocean)')
-# plt.xlabel('Year')
-# plt.title('SOCCOMv2 Ex2 - '+datetime.datetime.now().strftime(('%d/%m/%Y %H:%M')))
-# plt.grid()
-# plt.legend(bbox_to_anchor=(1.04, 0.5), loc="center left", borderaxespad=0)
-# plt.savefig('plots/SOCOMv2_model_flux_comparision_inVSout.png',format='png',dpi=300)
+plt.figure(figsize=(10,10))
+co = 0
+for t in head:
+    stat = scipy.stats.linregress(data['year'],data[t])
+    print(stat)
+    plt.plot(data['year'],data[t],label=t+' (model) ('+str(round(stat.slope*10,2))+' Pg C dec$^{-1}$)',color=cols[co])
+    model_f = os.path.join(model_loc,t,t+'_full.csv')
+    data2 = pd.read_table(model_f,sep=',')
+    stat = scipy.stats.linregress(data2['# Year'],-data2['Net air-sea CO2 flux (Pg C yr-1)'])
+    plt.plot(data2['# Year'],-data2['Net air-sea CO2 flux (Pg C yr-1)'],color=cols[co],linestyle='--',label=t+' (product) ('+str(round(stat.slope*10,2))+' Pg C dec$^{-1}$)')
+    co = co+1
 
+plt.ylabel('Net air-sea CO$_2$ flux (Pg C yr$^{-1}$; +ve into ocean)')
+plt.xlabel('Year')
+plt.title('SOCOMv2 Ex2 - '+datetime.datetime.now().strftime(('%d/%m/%Y %H:%M')))
+plt.ylim([0,4])
+plt.grid()
+plt.legend()
+plt.savefig('plots/SOCOMv2_model_flux_comparision.png',format='png',dpi=300)
+
+
+fig = plt.figure(figsize=(10,7))
+gs = GridSpec(1,1, figure=fig, wspace=0.25,hspace=0.15,bottom=0.1,top=0.95,left=0.1,right=0.72)
+ax = fig.add_subplot(gs[0,0])
+co = 0
+for t in head:
+    model_f = os.path.join(model_loc,t,t+'_full.csv')
+    data2 = pd.read_table(model_f,sep=',')
+    plt.plot(data2['# Year'],-data2['Downward air-sea CO2 flux (Pg C yr-1)'],color=cols[co],label=t+' (ingas)')
+    plt.plot(data2['# Year'],-data2['Upward air-sea CO2 flux (Pg C yr-1)'],color=cols[co],linestyle='--',label=t+' (outgas)')
+    co = co+1
+
+plt.ylabel('Air-sea CO$_2$ flux (Pg C yr$^{-1}$; +ve into ocean)')
+plt.xlabel('Year')
+plt.title('SOCCOMv2 Ex2 - '+datetime.datetime.now().strftime(('%d/%m/%Y %H:%M')))
+plt.grid()
+plt.legend(bbox_to_anchor=(1.04, 0.5), loc="center left", borderaxespad=0)
+plt.savefig('plots/SOCOMv2_model_flux_comparision_inVSout.png',format='png',dpi=300)
+
+"""
+"""
 output_loc = 'E:/SOCOMV2/EX2/flux/final_output'
 mod_dictionary = {'FESOM': 'FESOM2_REcoM',
     'CESM': 'CESM_ETHZ_r1',
