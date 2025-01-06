@@ -118,23 +118,23 @@ for mod in models:
         var_o[:] = dpco2
 
     if 'schmidt' in keys:
-        c.variables['schmidt'] = schmidt
+        c.variables['schmidt'][:] = schmidt
     else:
         var_o = c.createVariable('schmidt','f4',('longitude','latitude','time'))
         var_o[:] = schmidt
     if 'solubility' in keys:
-        c.variables['solubility'] = sol
+        c.variables['solubility'][:] = sol
     else:
         var_o = c.createVariable('solubility','f4',('longitude','latitude','time'))
         var_o[:] = sol
     if 'atm_fco2' in keys:
-        c.variables['atm_fco2'] = pgas
+        c.variables['atm_fco2'][:] = pgas
     else:
         var_o = c.createVariable('atm_fco2','f4',('longitude','latitude','time'))
         var_o[:] = pgas
 
     if 'k' in keys:
-        c.variables['k'] = k
+        c.variables['k'][:] = k
     else:
         var_o = c.createVariable('k','f4',('longitude','latitude','time'))
         var_o[:] = k

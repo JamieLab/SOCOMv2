@@ -68,18 +68,17 @@ output_loc = 'E:/SOCOMV2/EX2/flux/final_output'
 mod_dictionary = {'FESOM': 'FESOM2_REcoM',
     'CESM': 'CESM_ETHZ_r1',
     'IPSL': 'IPSL_r1',
-    'MRI': 'MRI_ESM2_2'}
-
-    #'NorESM': 'NorESM_OC1_2'}
+    'MRI': 'MRI_ESM2_2',
+    'NorESM': 'NorESM_vGCB2024'}
 mod_keys = list(mod_dictionary.keys())
-fig = plt.figure(figsize=(14,14))
-gs = GridSpec(2,2, figure=fig, wspace=0.25,hspace=0.25,bottom=0.1,top=0.95,left=0.1,right=0.9)
+fig = plt.figure(figsize=(14,21))
+gs = GridSpec(3,2, figure=fig, wspace=0.25,hspace=0.25,bottom=0.1,top=0.95,left=0.1,right=0.9)
 plt.suptitle('SOCOMv2 Ex2 Scaled - '+datetime.datetime.now().strftime(('%d/%m/%Y %H:%M')))
-fig2 = plt.figure(figsize=(14,14))
-gs = GridSpec(2,2, figure=fig2, wspace=0.25,hspace=0.25,bottom=0.1,top=0.95,left=0.1,right=0.9)
+fig2 = plt.figure(figsize=(14,21))
+gs = GridSpec(3,2, figure=fig2, wspace=0.25,hspace=0.25,bottom=0.1,top=0.95,left=0.1,right=0.9)
 plt.suptitle('SOCOMv2 Ex2 Scaled - '+datetime.datetime.now().strftime(('%d/%m/%Y %H:%M')))
-ax = [fig.add_subplot(gs[0,0]),fig.add_subplot(gs[0,1]),fig.add_subplot(gs[1,0]),fig.add_subplot(gs[1,1])]
-ax2 = [fig2.add_subplot(gs[0,0]),fig2.add_subplot(gs[0,1]),fig2.add_subplot(gs[1,0]),fig2.add_subplot(gs[1,1])]
+ax = [fig.add_subplot(gs[0,0]),fig.add_subplot(gs[0,1]),fig.add_subplot(gs[1,0]),fig.add_subplot(gs[1,1]),fig.add_subplot(gs[2,0])]
+ax2 = [fig2.add_subplot(gs[0,0]),fig2.add_subplot(gs[0,1]),fig2.add_subplot(gs[1,0]),fig2.add_subplot(gs[1,1]),fig2.add_subplot(gs[2,0])]
 
 
 t = 0
@@ -138,18 +137,17 @@ output_loc = 'E:/SOCOMV2/EX2/flux/final_output'
 mod_dictionary = {'FESOM': 'FESOM2_REcoM',
     'CESM': 'CESM_ETHZ_r1',
     'IPSL': 'IPSL_r1',
-    'MRI': 'MRI_ESM2_2'}
-
-    #'NorESM': 'NorESM_OC1_2'}
+    'MRI': 'MRI_ESM2_2',
+    'NorESM': 'NorESM_vGCB2024'}
 mod_keys = list(mod_dictionary.keys())
-fig = plt.figure(figsize=(14,14))
-gs = GridSpec(2,2, figure=fig, wspace=0.25,hspace=0.25,bottom=0.1,top=0.95,left=0.1,right=0.9)
+fig = plt.figure(figsize=(14,21))
+gs = GridSpec(3,2, figure=fig, wspace=0.25,hspace=0.25,bottom=0.1,top=0.95,left=0.1,right=0.9)
 plt.suptitle('SOCOMv2 Ex2 Consistent - '+datetime.datetime.now().strftime(('%d/%m/%Y %H:%M')))
-fig2 = plt.figure(figsize=(14,14))
-gs = GridSpec(2,2, figure=fig2, wspace=0.25,hspace=0.25,bottom=0.1,top=0.95,left=0.1,right=0.9)
+fig2 = plt.figure(figsize=(14,21))
+gs = GridSpec(3,2, figure=fig2, wspace=0.25,hspace=0.25,bottom=0.1,top=0.95,left=0.1,right=0.9)
 plt.suptitle('SOCOMv2 Ex2 Consistent - '+datetime.datetime.now().strftime(('%d/%m/%Y %H:%M')))
-ax = [fig.add_subplot(gs[0,0]),fig.add_subplot(gs[0,1]),fig.add_subplot(gs[1,0]),fig.add_subplot(gs[1,1])]
-ax2 = [fig2.add_subplot(gs[0,0]),fig2.add_subplot(gs[0,1]),fig2.add_subplot(gs[1,0]),fig2.add_subplot(gs[1,1])]
+ax = [fig.add_subplot(gs[0,0]),fig.add_subplot(gs[0,1]),fig.add_subplot(gs[1,0]),fig.add_subplot(gs[1,1]),fig.add_subplot(gs[2,0])]
+ax2 = [fig2.add_subplot(gs[0,0]),fig2.add_subplot(gs[0,1]),fig2.add_subplot(gs[1,0]),fig2.add_subplot(gs[1,1]),fig2.add_subplot(gs[2,0])]
 
 
 t = 0

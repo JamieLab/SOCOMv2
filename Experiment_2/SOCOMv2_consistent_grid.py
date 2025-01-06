@@ -29,8 +29,8 @@ def lon_switch(var):
 mod_dictionary = {'FESOM': 'FESOM2_REcoM',
     'CESM': 'CESM_ETHZ_r1',
     'IPSL': 'IPSL_r1',
-    'MRI': 'MRI_ESM2_2'}
-    #'NorESM': 'NorESM_OC1_2'}
+    'MRI': 'MRI_ESM2_2',
+    'NorESM': 'NorESM_vGCB2024'}
 mod_keys = list(mod_dictionary.keys())
 start_yr = 1985
 end_yr=2022
@@ -115,7 +115,7 @@ models = []
 for i in g:
     models.append(i.split('\\')[-1])
 print(models)
-models.remove('NorESM_vGCB2024')
+# models.remove('NorESM_vGCB2024')
 for mod in models:
     data_file = os.path.join(model_loc,mod,'combined_variables.nc')
     fl.calc_annual_flux(os.path.join(model_loc,mod),log,lag,start_yr,end_yr,bath_file=os.path.join(inp_loc,'bath.nc'),flux_file = data_file,save_file = os.path.join(model_loc,mod,mod+'_consistent.csv'),

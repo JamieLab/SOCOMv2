@@ -47,8 +47,8 @@ print(data_folds)
 mod_dictionary = {'FESOM': 'FESOM2_REcoM',
     'CESM': 'CESM_ETHZ_r1',
     'IPSL': 'IPSL_r1',
-    'MRI': 'MRI_ESM2_2'}
-    #'NorESM': 'NorESM_OC1_2'}
+    'MRI': 'MRI_ESM2_2',
+    'NorESM': 'NorESM_vGCB2024'}
 mod_keys = list(mod_dictionary.keys())
 print(mod_keys)
 

@@ -18,8 +18,9 @@ sys.path.append(oceanicu)
 
 import data_utils as du
 
-output_loc = 'D:/SOCOMV2/EX2/UEPFNNU/final_output'
-locations = ['D:/SOCOMV2/EX2/UEPFNNU/CESM_ETHZ_r1','D:/SOCOMV2/EX2/UEPFNNU/FESOM2_REcoM','D:/SOCOMV2/EX2/UEPFNNU/IPSL_r1','D:/SOCOMV2/EX2/UEPFNNU/MRI_ESM2_2','D:/SOCOMV2/EX2/UEPFNNU/NorESM_OC1_2']
+output_loc = 'E:/SOCOMV2/EX2/UEPFNNU/final_output'
+locations = ['E:/SOCOMV2/EX2/UEPFNNU/CESM_ETHZ_r1','E:/SOCOMV2/EX2/UEPFNNU/FESOM2_REcoM','E:/SOCOMV2/EX2/UEPFNNU/IPSL_r1','D:/SOCOMV2/EX2/UEPFNNU/MRI_ESM2_2','E:/SOCOMV2/EX2/UEPFNNU/NorESM_OC1_2']
+locations = ['E:/SOCOMV2/EX2/UEPFNNU/NorESM_vGCB2024']
 
 for locat in locations:
     fil = locat.split('/')
@@ -33,7 +34,7 @@ for locat in locations:
     fco2 = du.lon_switch(np.transpose(fco2,[2,1,0]))
     lon = lon+180
 
-    file = os.path.join(output_loc,'Ex2-2024_'+fil[-1]+'_dataprod_UEPFNNU_1985_2022.nc')
+    file = os.path.join(output_loc,'Ex2-2024_'+fil[-1]+'_dataprod_UEPFNNU_1985-2022.nc')
     outp = Dataset(file,'w',format='NETCDF4_CLASSIC')
     outp.date_created = datetime.datetime.now().strftime(('%d/%m/%Y'))
     outp.created_by = 'Daniel J. Ford (d.ford@exeter.ac.uk), Jamie D. Shutler (j.d.shutler@exeter.ac.uk) and Andrew Watson (Andrew.Watson@exeter.ac.uk)'
