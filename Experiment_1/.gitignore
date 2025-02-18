@@ -1,3 +1,4 @@
 output.nc
 plots/*
 *.csv
+*.png
