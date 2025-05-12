@@ -28,11 +28,11 @@ co = 0
 for t in head:
     stat = scipy.stats.linregress(data['year'],data[t])
     print(stat)
-    plt.plot(data['year'],data[t],label=t+' (model) ('+str(round(stat.slope*10,2))+' Pg C dec$^{-1}$)',color=cols[co])
+    plt.plot(data['year'],data[t],label=t+' (GCB2023) ('+str(round(stat.slope*10,2))+' Pg C dec$^{-1}$)',color=cols[co])
     model_f = os.path.join(model_loc,t,t+'_full.csv')
     data2 = pd.read_table(model_f,sep=',')
     stat = scipy.stats.linregress(data2['# Year'],-data2['Net air-sea CO2 flux (Pg C yr-1)'])
-    plt.plot(data2['# Year'],-data2['Net air-sea CO2 flux (Pg C yr-1)'],color=cols[co],linestyle='--',label=t+' (product) ('+str(round(stat.slope*10,2))+' Pg C dec$^{-1}$)')
+    plt.plot(data2['# Year'],-data2['Net air-sea CO2 flux (Pg C yr-1)'],color=cols[co],linestyle='--',label=t+' (SOCOMv2) ('+str(round(stat.slope*10,2))+' Pg C dec$^{-1}$)')
     co = co+1
 
 plt.ylabel('Net air-sea CO$_2$ flux (Pg C yr$^{-1}$; +ve into ocean)')

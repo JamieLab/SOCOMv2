@@ -102,6 +102,7 @@ for i in mod_keys:
 
     out = Dataset(os.path.join(flux_location,'final_output',mod_dictionary[i]+'_full_variables.nc'),'w')
     out.time_created = datetime.datetime.now().strftime(('%d/%m/%Y %H:%M'))
+    out.last_modified = datetime.datetime.now().strftime(('%d/%m/%Y %H:%M'))
     out.generated_by = 'Daniel J. Ford (d.ford@exeter.ac.uk)'
     out.generated_from = flux_location
 
@@ -202,16 +203,17 @@ for i in mod_keys:
     var.description = 'Calculated from model temperature'
 
     var = out.createVariable('solubility','f4',('time','lat','lon'))
-    var[:] = lon_switch(np.transpose(np.array(c['schmidt']),[2,1,0]))
+    var[:] = lon_switch(np.transpose(np.array(c['solubility']),[2,1,0]))
     var.Long_name = 'Solubility for air-sea CO2 flux calculation'
     var.Units = 'mol L-1 atm-1'
     var.description = 'Calculated from model temperature and salinity'
 
     var = out.createVariable('gas_transfer','f4',('time','lat','lon'))
     var[:] = lon_switch(np.transpose(np.array(c['k']),[2,1,0]))
-    var.Long_name = 'Gas transfer coefficient'
+    var.Long_name = 'Gas transfer coefficient at the Schmidt number'
     var.Units = 'cm hr-1'
     var.description = 'Calculated from ERA5 winds using a = 0.271'
+    var.formulation = '(660/Schmidt)^-0.5 * kw'
     c.close()
 
     for j in data_folds:

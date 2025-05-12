@@ -45,6 +45,7 @@ print(g)
 
 for i in g:
     c = Dataset(i,'a')
+    c.last_modified = datetime.datetime.now().strftime(('%d/%m/%Y %H:%M'))
     keys = c.variables.keys()
     p = []
     for t in keys:
