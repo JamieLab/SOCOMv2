@@ -34,7 +34,7 @@ output_loc = 'E:/SOCOMV2/EX5/Output/'
 output_flux_loc = os.path.join(output_loc,'fluxes')
 
 files = glob.glob(output_loc+'*.nc')
-
+# files = ['E:/SOCOMV2/EX5/Output\\Ex5_2025_EXP1_dataproduct_JMA-MLR_1985-2023.nc','E:/SOCOMV2/EX5/Output\\Ex5_2025_EXP0_dataproduct_JMA-MLR_1985-2023.nc']
 for file in files:
     s = file.split('_')
     print(s)
@@ -49,7 +49,7 @@ for file in files:
         end_yr = int(s[-1].split('-')[1].split('.')[0])
         print(start_yr)
         print(end_yr)
-
+        #
         #Vars should have each entry as [Extra_Name, netcdf_variable_name,data_location,produce_anomaly]
         vars = [['CCI_SST','analysed_sst',os.path.join(inps,'SST','%Y','%Y%m*.nc'),1]
         ,['CCI_SST','sea_ice_fraction',os.path.join(inps,'SST','%Y','%Y%m*.nc'),1]
@@ -85,29 +85,49 @@ for file in files:
         cinp.append_independent_test(os.path.join(ref_locs[s[2]],'inputs','neural_network_input.nc'),data_file,'CCI_SST')
 
         c = Dataset(file,'r')
-        lat = np.array(c.variables['lat'])
-        lon = np.array(c.variables['lon'])
-        sfco2 = np.transpose(np.array(c.variables['sfco2']),[2,1,0])
+        keys = c.variables.keys()
+        if 'latitude' in keys:
+            lat = np.array(c.variables['latitude'])
+        else:
+            lat = np.array(c.variables['lat'])
+        if 'longitude' in keys:
+            lon = np.array(c.variables['longitude'])-180
+        else:
+            lon = np.array(c.variables['lon'])-180
+
+        if s[4] == 'CarboScope': # CarboScope is already in -180 to 180, so we convert back
+            lon = lon + 180
+
+        if s[4] == 'CarboScope':
+            sfco2 = np.transpose(np.array(c.variables['pCO2']),[2,1,0]) * 0.996 #Multplication value from Christian Rodenbeck.
+        else:
+            sfco2 = np.transpose(np.array(c.variables['sfco2']),[2,1,0])
         c.close()
+        #Added a simple check for missing/fill values.
+        sfco2[sfco2<=1] = np.nan
+        sfco2[sfco2>3000] = np.nan
 
         c = Dataset(data_file,'r')
         time = np.array(c.variables['time'])
         c.close()
 
         direct = {}
-        direct['fco2'] = np.roll(sfco2,180,axis=0)
+        if s[4] == 'CarboScope': # CarboScope data is already in -180 to 180 so doesn't need rolling.
+            direct['fco2'] = sfco2
+        else:
+            direct['fco2'] = np.roll(sfco2,180,axis=0)
         direct['fco2_net_unc'] = np.zeros((sfco2.shape))
         direct['fco2_para_unc'] = np.zeros((sfco2.shape))
         direct['fco2_val_unc'] = np.zeros((sfco2.shape))
         direct['fco2_tot_unc'] = np.zeros((sfco2.shape))
 
-        cinp.save_netcdf(os.path.join(model_save_loc,'output.nc'),direct,lon-180,lat,sfco2.shape[2],time_track=time)
+        cinp.save_netcdf(os.path.join(model_save_loc,'output.nc'),direct,lon,lat,sfco2.shape[2],time_track=time)
 
         OC4C_calc_independent_test_rmsd(model_save_loc,data_file,'CCI_SST',os.path.join(model_save_loc,'output.nc'),'F:/Data/RECCAP/RECCAP2_region_masks_all_v20221025_DJF.nc','reccap')
         add_validation_unc(model_save_loc,data_file,'RECCAP_reccap',file='OC4C_independent_test.csv')
 
-        ## FLuxes
-        ## No Salty Skin
+        # FLuxes
+        # No Salty Skin
         fluxengine_config = 'C:/Users/df391/OneDrive - University of Exeter/Post_Doc_ESA_Contract/OceanICU/fluxengine_config/fluxengine_config_wanninkhof_era5_scaled_nosalt.conf'
         fl.fluxengine_netcdf_create(model_save_loc,input_file = data_file,tsub='CCI_SST_analysed_sst',ws = 'ERA5_ws',ws2 = 'ERA5_ws2',seaice = 'OSISAF_ice_conc',
                  sal='CCI_SSS_sss_CMEMS_so',msl = 'ERA5_msl',xCO2 = 'NOAA_ERSL_xCO2',start_yr=start_yr,end_yr=end_yr, coare_out = os.path.join(model_save_loc,'inputs','coare'), tair = 'ERA5_t2m', dewair = 'ERA5_d2m',
@@ -116,7 +136,8 @@ for file in files:
         fl.flux_uncertainty_calc(model_save_loc,start_yr = start_yr,end_yr=end_yr,fco2_tot_unc = -1,k_perunc=0.2,unc_input_file=data_file,sst_unc='CCI_SST_analysed_sst_uncertainty',atm_unc=0.4)
         fl.calc_annual_flux(model_save_loc,lon=log,lat=lag,start_yr=start_yr,end_yr=end_yr)
         fl.fixed_uncertainty_append(model_save_loc,lon=log,lat=lag)
-        fl.variogram_evaluation(model_save_loc,output_file='fco2_decorrelation',start_yr =start_yr,end_yr=end_yr)
+        if not os.path.exists(os.path.join(model_save_loc,'decorrelation','fco2_decorrelation.csv')):
+            fl.variogram_evaluation(model_save_loc,output_file='fco2_decorrelation',start_yr =start_yr,end_yr=end_yr,ens=50)
         shutil.copy(os.path.join(ref_loc,'decorrelation','sst_decorrelation.csv'),os.path.join(model_save_loc,'decorrelation','sst_decorrelation.csv'))
         shutil.copy(os.path.join(ref_loc,'decorrelation','ice_decorrelation.csv'),os.path.join(model_save_loc,'decorrelation','ice_decorrelation.csv'))
         shutil.copy(os.path.join(ref_loc,'decorrelation','wind_decorrelation.csv'),os.path.join(model_save_loc,'decorrelation','wind_decorrelation.csv'))
@@ -138,14 +159,15 @@ for file in files:
             fl.fluxengine_run(model_save_loc,fluxengine_config,start_yr,end_yr,output_ov='flux_salty_cool_skin')
             fl.flux_uncertainty_calc(model_save_loc,start_yr = start_yr,end_yr=end_yr,fco2_tot_unc = -1,k_perunc=0.2,unc_input_file=data_file,sst_unc='CCI_SST_analysed_sst_uncertainty',atm_unc=0.4,flux_loc = 'flux_salty_cool_skin',override_output='output_flux_salty_cool_skin.nc')
             fl.calc_annual_flux(model_save_loc,lon=lon,lat=lat,start_yr=start_yr,end_yr=end_yr,flux_file = os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'),save_file=os.path.join(model_save_loc,'annual_flux_salty_cool_skin.csv'))
+            fl.fixed_uncertainty_append(model_save_loc,lon=log,lat=lag,flux_file = os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'),output_file='annual_flux_salty_cool_skin.csv')
 
 
-            fl.montecarlo_flux_testing(model_save_loc,decor='fco2_decorrelation.csv',flux_var = 'flux_unc_fco2sw_val',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',flux_loc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
-            fl.montecarlo_flux_testing(model_save_loc,decor='ice_decorrelation.csv',seaice=True,seaice_var='OSISAF_total_standard_uncertainty',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',flux_loc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
-            fl.montecarlo_flux_testing(model_save_loc,decor='sst_decorrelation.csv',flux_var = 'flux_unc_ph2o',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',flux_loc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
-            fl.montecarlo_flux_testing(model_save_loc,decor='sst_decorrelation.csv',flux_var = 'flux_unc_schmidt',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',flux_loc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
-            fl.montecarlo_flux_testing(model_save_loc,decor='sst_decorrelation.csv',flux_var = 'flux_unc_solskin_unc',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',flux_loc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
-            fl.montecarlo_flux_testing(model_save_loc,decor='sst_decorrelation.csv',flux_var = 'flux_unc_solsubskin_unc',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',flux_loc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
-            fl.montecarlo_flux_testing(model_save_loc,decor='wind_decorrelation.csv',flux_var = 'flux_unc_wind',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',flux_loc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
-            fl.montecarlo_flux_testing(model_save_loc,decor=[2000,1500],flux_var = 'flux_unc_xco2atm',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',flux_loc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
-    #
+            fl.montecarlo_flux_testing(model_save_loc,decor='fco2_decorrelation.csv',flux_var = 'flux_unc_fco2sw_val',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',fluxloc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
+            fl.montecarlo_flux_testing(model_save_loc,decor='ice_decorrelation.csv',seaice=True,seaice_var='OSISAF_total_standard_uncertainty',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',fluxloc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
+            fl.montecarlo_flux_testing(model_save_loc,decor='sst_decorrelation.csv',flux_var = 'flux_unc_ph2o',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',fluxloc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
+            fl.montecarlo_flux_testing(model_save_loc,decor='sst_decorrelation.csv',flux_var = 'flux_unc_schmidt',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',fluxloc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
+            fl.montecarlo_flux_testing(model_save_loc,decor='sst_decorrelation.csv',flux_var = 'flux_unc_solskin_unc',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',fluxloc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
+            fl.montecarlo_flux_testing(model_save_loc,decor='sst_decorrelation.csv',flux_var = 'flux_unc_solsubskin_unc',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',fluxloc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
+            fl.montecarlo_flux_testing(model_save_loc,decor='wind_decorrelation.csv',flux_var = 'flux_unc_wind',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',fluxloc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
+            fl.montecarlo_flux_testing(model_save_loc,decor=[2000,1500],flux_var = 'flux_unc_xco2atm',start_yr =start_yr,end_yr=end_yr,output_file='annual_flux_salty_cool_skin.csv',fluxloc = os.path.join(model_save_loc,'flux_salty_cool_skin'),inp_file=os.path.join(model_save_loc,'output_flux_salty_cool_skin.nc'))
+        #
