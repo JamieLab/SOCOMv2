@@ -1,0 +1,4 @@
+UExP-FNN-U changelog for SOCOMv2 Experiment 3
+
+v1 - Initial version running the UExP-FNN-U in it's standard format
+v2 - Change the Takahashi climatology for a model dependent climatology (generated from the complete model spco2 fields).

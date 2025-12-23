@@ -30,7 +30,7 @@ def save_output_file(model_save_loc,ensemble,output_loc,start_yr,end_yr,version)
     time = np.array(c['time'])
     c.close()
 
-    file = os.path.join(final_output_loc,'Ex3-2025_'+ensembles[i][0]+'_'+ensembles[i][1]+'_dataprod_UExP-FNN-U_'+str(start_yr)+'_'+str(end_yr)+'.nc')
+    file = os.path.join(final_output_loc,'Ex3-2025_'+ensembles[i][0]+'_'+ensembles[i][1]+'_dataprod_UExP-FNN-U-'+version+'_'+str(start_yr)+'_'+str(end_yr)+'.nc')
     outp = Dataset(file,'w',format='NETCDF4_CLASSIC')
     outp.date_created = datetime.datetime.now().strftime(('%d/%m/%Y'))
     outp.created_by = 'Daniel J. Ford (d.ford@exeter.ac.uk), Jamie D. Shutler (j.d.shutler@exeter.ac.uk) and Andrew Watson (Andrew.Watson@exeter.ac.uk)'
@@ -107,10 +107,10 @@ if __name__ == '__main__':
     import data_utils as du
 
     main_loc = 'D:/SOCOMv2/EX3/'
-    version = 'v1'
+    version = 'v2'
     start_yr = 1982
     end_yr = 2023
-    final_output_loc = os.path.join(main_loc,'final_output')
+    final_output_loc = os.path.join(main_loc,'final_output_'+version)
     du.makefolder(final_output_loc)
     bath_file = os.path.join(main_loc,'bath.nc')
 
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     ]
     for i in range(len(ensembles)):
         print(ensembles[i])
-        model_save_loc = os.path.join(main_loc,ensembles[i][0]+'_'+ensembles[i][1])
+        model_save_loc = os.path.join(main_loc,ensembles[i][0]+'_'+ensembles[i][1]+'_'+version)
         if not os.path.exists(model_save_loc):
             file = download_file(ensembles[i],main_loc)
 
@@ -206,15 +206,20 @@ if __name__ == '__main__':
             ['model','sss',os.path.join(inps,'sss','%Y_%m*.nc'),1],
             ['model','mld_log',os.path.join(inps,'mld_log','%Y_%m*.nc'),1],
             ['model','xco2',os.path.join(inps,'xco2','%Y_%m*.nc'),1],
-            ['model','spco2',os.path.join(inps,'spco2','%Y_%m*.nc'),0],
-            ['Takahashi','taka','D:/Eddies/Data_n//Takahashi_Clim/monthly/takahashi_%m_.nc',0]
+            ['model','spco2',os.path.join(inps,'spco2','%Y_%m*.nc'),1],
+            #['Takahashi','taka','D:/Eddies/Data_n//Takahashi_Clim/monthly/takahashi_%m_.nc',0]
             ]
             cinp.driver(data_file,vars,start_yr = start_yr,end_yr = end_yr,lon = lon,lat = lat)
+
+            cinp.netcdf_clim_save(data_file,'model_spco2_clim',os.path.join(inps,'spco2'))
+            vars [['','model_spco2_clim',os.path.join(inps,'spco2','%m_model_spco2_clim_climatology.nc')]]
+            cinp.driver(data_file,vars,start_yr = start_yr,end_yr = end_yr,lon = lon,lat = lat,append=True,fill_clim=False)
+
             import run_reanalysis as rean
             socat_file = os.path.join(inps,'spco2','all_spco2.nc')
             rean.model_fco2_append(socat_file,data_file,start_yr = start_yr,end_yr=end_yr,ref_yr =1982,name = 'model',var_name='spco2',transposing=False)
             import self_organising_map as som
-            som.som_feed_forward(model_save_loc,data_file,['Takahashi_taka','model_sst','model_sss','model_mld_log'])
+            som.som_feed_forward(model_save_loc,data_file,['_model_spco2_clim','model_sst','model_sss','model_mld_log'])
             cinp.append_longhurst_prov(model_save_loc,'D:/Eddies/Data_n/Longhurst/Longhurst_1_deg.nc',[1],17,'prov_smoothed')
             cinp.append_longhurst_prov(model_save_loc,'D:/Eddies/Data_n/Longhurst/Longhurst_1_deg.nc',[16,25],16,'prov_smoothed')
             cinp.manual_prov(model_save_loc,[35,50],[44,60],'prov_smoothed')
