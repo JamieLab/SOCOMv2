@@ -1,0 +1,10 @@
+UExP-FNN-U changelog for SOCOMv2 Experiment 4
+
+With trend
+v1 - Initial run of the UExP-FNN-U
+v2 - Changed the fCO2sw climatology for the SOM stage from the Takahashi 2002, to a climatology generated from the input files for this experiment
+
+Without trend
+v1 - Initial run of the UExP-FNN-U
+v1.1 - Fixes an issue with the input fCO2sw data (it was using the fCO2sw with trend data, but running with climatology xCO2atm made results look reasonable)
+v2 - Changed the fCO2sw climatology for the SOM stage from the Takahashi 2002, to a climatology generated from the input files for this experiment
