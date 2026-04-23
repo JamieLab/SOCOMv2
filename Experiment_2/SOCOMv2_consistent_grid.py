@@ -107,7 +107,7 @@ for prod in g:
     temp_out_loc = os.path.join(output_loc,product_name+'_'+model_ref)
     data_file = os.path.join(temp_out_loc,product_name+'_'+model_ref+'.nc')
 
-    fl.calc_annual_flux(temp_out_loc,log,lag,start_yr,end_yr,bath_file=os.path.join(inp_loc,'bath.nc'),flux_file = data_file,save_file = os.path.join(temp_out_loc,product_name+'_'+model_ref+'_consistent.csv'),
+    fl.calc_annual_flux(temp_out_loc,log,lag,start_yr,end_yr,land_file=os.path.join(inp_loc,'bath.nc'),flux_file = data_file,save_file = os.path.join(temp_out_loc,product_name+'_'+model_ref+'_consistent.csv'),
         mask_file=os.path.join(final_output,'masks',mod_dictionary[model_ref]+'_full_variables.nc'))
 
 g = glob.glob(os.path.join(model_location,'*'))
@@ -119,7 +119,7 @@ print(models)
 # models.remove('NorESM_vGCB2024')
 for mod in models:
     data_file = os.path.join(model_loc,mod,'combined_variables.nc')
-    fl.calc_annual_flux(os.path.join(model_loc,mod),log,lag,start_yr,end_yr,bath_file=os.path.join(inp_loc,'bath.nc'),flux_file = data_file,save_file = os.path.join(model_loc,mod,mod+'_consistent.csv'),
+    fl.calc_annual_flux(os.path.join(model_loc,mod),log,lag,start_yr,end_yr,land_file=os.path.join(inp_loc,'bath.nc'),flux_file = data_file,save_file = os.path.join(model_loc,mod,mod+'_consistent.csv'),
         mask_file=os.path.join(final_output,'masks',mod+'_full_variables.nc'))
 
 

@@ -112,7 +112,7 @@ for prod in g:
             uni2 = uni2[p].split('-')
         elif '/' in uni2[p]:
             uni2 = uni2[p].split('/')
-        ref_time = datetime.datetime(int(uni2[0]),int(uni2[1]),int(uni2[2]))
+        ref_time = datetime.datetime(int(uni2[0]),int(uni2[1]),int(uni2[2]),0,0,0)
         print(ref_time)
         print(uni2)
         if ('Days' in uni) or ('days' in uni):
@@ -120,7 +120,12 @@ for prod in g:
             print('Days')
             for t in range(len(time)):
                 time[t] = (ref_time + datetime.timedelta(days = int(time[t]))).year
-        elif ('Seconds' in uni) or ('seconds in uni'):
+        elif ('Hours' in uni) or ('hours' in uni):
+            print(uni)
+            print('Hours')
+            for t in range(len(time)):
+                time[t] = (ref_time + datetime.timedelta(hours = int(time[t]))).year
+        elif ('Seconds' in uni) or ('seconds' in uni):
             print(uni)
             print('Seconds')
             for t in range(len(time)):
@@ -184,33 +189,33 @@ for prod in g:
         os.chdir(return_path)# Return (lets get out of this folder...)
 
         # Now lets load all the flux data that fluxengine has just made... and we need the ice data
-    print((end_yr-start_yr-1)*12)
-    flux = fl.load_flux_var(os.path.join(temp_out_loc,'flux'),'OF',start_yr,end_yr,len(log),len(lag),(end_yr-start_yr+1)*12)
-    ice = fl.load_flux_var(os.path.join(temp_out_loc,'flux'),'P1',start_yr,end_yr,len(log),len(lag),(end_yr-start_yr+1)*12)
-    dpco2 = fl.load_flux_var(os.path.join(temp_out_loc,'flux'),'dpCO2',start_yr,end_yr,len(log),len(lag),(end_yr-start_yr+1)*12)
-    # Flux engine doesn't apply the ice scaling so we do this manually (same procedure is needed for the FluxEngine budgets tool)
-    flux = flux * (1-ice)
-    flux = np.transpose(flux,(1,0,2))# Now we transpose so we can save the flux back to data_file (so it can be used later...)
-    ice = np.transpose(ice,(1,0,2))
-    dpco2 = np.transpose(dpco2,(1,0,2))
-    c = Dataset(data_file,'a')
-    keys = c.variables.keys()
-    if 'flux' in keys:
-        c.variables['flux'][:] = flux
-    else:
-        var_o = c.createVariable('flux','f4',('longitude','latitude','time'))
-        var_o[:] = flux
-    if 'ice' in keys:
-        c.variables['ice'][:] = ice
-    else:
-        var_o = c.createVariable('ice','f4',('longitude','latitude','time'))
-        var_o[:] = ice
+        print((end_yr-start_yr-1)*12)
+        flux = fl.load_flux_var(os.path.join(temp_out_loc,'flux'),'OF',start_yr,end_yr,len(log),len(lag),(end_yr-start_yr+1)*12)
+        ice = fl.load_flux_var(os.path.join(temp_out_loc,'flux'),'P1',start_yr,end_yr,len(log),len(lag),(end_yr-start_yr+1)*12)
+        dpco2 = fl.load_flux_var(os.path.join(temp_out_loc,'flux'),'dpCO2',start_yr,end_yr,len(log),len(lag),(end_yr-start_yr+1)*12)
+        # Flux engine doesn't apply the ice scaling so we do this manually (same procedure is needed for the FluxEngine budgets tool)
+        flux = flux * (1-ice)
+        flux = np.transpose(flux,(1,0,2))# Now we transpose so we can save the flux back to data_file (so it can be used later...)
+        ice = np.transpose(ice,(1,0,2))
+        dpco2 = np.transpose(dpco2,(1,0,2))
+        c = Dataset(data_file,'a')
+        keys = c.variables.keys()
+        if 'flux' in keys:
+            c.variables['flux'][:] = flux
+        else:
+            var_o = c.createVariable('flux','f4',('longitude','latitude','time'))
+            var_o[:] = flux
+        if 'ice' in keys:
+            c.variables['ice'][:] = ice
+        else:
+            var_o = c.createVariable('ice','f4',('longitude','latitude','time'))
+            var_o[:] = ice
 
-    if 'dfCO2' in keys:
-        c.variables['dfCO2'][:] = dpco2
-    else:
-        var_o = c.createVariable('dfCO2','f4',('longitude','latitude','time'))
-        var_o[:] = dpco2
-    c.close()
-        # Calcualte the annual fluxes using the OceanICU framework :-)
-    fl.calc_annual_flux(temp_out_loc,log,lag,start_yr,end_yr,bath_file=os.path.join(inp_loc,'bath.nc'),flux_file = data_file,save_file = os.path.join(temp_out_loc,product_name+'_'+model_ref+'.csv'))
+        if 'dfCO2' in keys:
+            c.variables['dfCO2'][:] = dpco2
+        else:
+            var_o = c.createVariable('dfCO2','f4',('longitude','latitude','time'))
+            var_o[:] = dpco2
+        c.close()
+            # Calcualte the annual fluxes using the OceanICU framework :-)
+        fl.calc_annual_flux(temp_out_loc,log,lag,start_yr,end_yr,land_file=os.path.join(inp_loc,'bath.nc'),flux_file = data_file,save_file = os.path.join(temp_out_loc,product_name+'_'+model_ref+'.csv'))

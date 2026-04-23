@@ -28,9 +28,11 @@ def lon_switch_2d(var):
     temp[:,180:] = var[:,0:180]
     return temp
 # Setting up so we can retrieve the right model (tos,sos, etc) for the data product...
-flux_location = 'E:/SOCOMV2/EX2/flux/'
+base_loc = 'E:/SOCOMv2/EX2'
+flux_location = os.path.join(base_loc,'flux')
 model_location = os.path.join(flux_location,'models')
 data_prod_location = os.path.join(flux_location,'data_products')
+socat_location = os.path.join(base_loc,'Input-from-ocean-models-subsampled-SOCATv2023')
 bath_file=os.path.join(flux_location,'bath.nc')
 c = Dataset(bath_file,'r')
 mask_sfc = np.array(c['ocean_proportion'])
@@ -90,7 +92,11 @@ for i in mod_keys:
 
 # Generate netcdf output of all the data for each model...
 for i in mod_keys:
-
+    #Load the SOCAT track data
+    c = Dataset(os.path.join(socat_location,mod_dictionary[i],'SOCATv2023_tracks_sfco2_'+mod_dictionary[i]+'_A_gr_1970_2022.nc'),'r')
+    socat = np.array(c['sfco2'][:])
+    socat[np.isnan(socat) == 0] = 1
+    c.close()
     #Load the model_data_file
 
     c = Dataset(os.path.join(model_location,mod_dictionary[i],'combined_variables.nc'),'r')
@@ -214,6 +220,12 @@ for i in mod_keys:
     var.Units = 'cm hr-1'
     var.description = 'Calculated from ERA5 winds using a = 0.271'
     var.formulation = '(660/Schmidt)^-0.5 * kw'
+
+    var = out.createVariable('socat_mask','f4',('time','lat','lon'))
+    var[:] = socat
+    var.Long_name = 'SOCATv2023 sampling mask'
+    var.description = 'SOCATv2023 sampling mask used within SOCOM Experiment 2'
+    var.from_file = os.path.join(socat_location,mod_dictionary[i],'SOCATv2023_tracks_sfco2_'+mod_dictionary[i]+'_A_gr_1970_2022.nc')
     c.close()
 
     for j in data_folds:

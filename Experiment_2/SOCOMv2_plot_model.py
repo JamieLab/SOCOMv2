@@ -4,7 +4,7 @@ Created by Daniel J. Ford (d.ford@exeter.ac.uk)
 Date: 06/2024
 
 """
-cols = ['#332288','#44AA99','#882255','#DDCC77', '#117733', '#88CCEE','#999933','#CC6677','#AA4499']
+cols = ['k','#332288','#44AA99','#882255','#DDCC77', '#117733', '#88CCEE','#999933','#CC6677','#AA4499','b']
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -95,8 +95,9 @@ for i in range(len(mod_keys)):
     if t == 0:
         data_cols = {}
         for h in range(len(prod)):
+            print(h)
             data_cols[prod[h]] = cols[h]
-        print(data_cols)
+            print(data_cols)
         t=1
 
     #p = 0

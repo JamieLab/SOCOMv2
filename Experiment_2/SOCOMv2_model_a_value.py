@@ -52,7 +52,7 @@ models = [
     'E:/SOCOMV2/EX2/flux/models/IPSL_r1',
     'E:/SOCOMV2/EX2/flux/models/NorESM_vGCB2024']
 model_gcb = 'C:/Users/df391/OneDrive - University of Exeter/Post_Doc_ESA_Contract/SOCOMv2/EX2/GCB_model_fluxes.csv'
-a_scale = [0.251,0.251,0.310,0.251,0.337]
+a_scale = [0.251,0.251,0.310,0.337,0.251]
 
 log,lag = du.reg_grid(lat=1,lon=1)
 inp_loc = 'E:/SOCOMV2/EX2/flux'
@@ -102,7 +102,7 @@ for i in range(len(models)):
         var_o[:] = dpco2
     c.close()
     m = models[i].split('/')
-    fl.calc_annual_flux(models[i],log,lag,start_yr,end_yr,bath_file=os.path.join(inp_loc,'bath.nc'),flux_file = data_file,save_file = os.path.join(models[i],m[-1]+f'_full_a{int(a_scale[i]*1000)}.csv'))
+    fl.calc_annual_flux(models[i],log,lag,start_yr,end_yr,land_file=os.path.join(inp_loc,'bath.nc'),flux_file = data_file,save_file = os.path.join(models[i],m[-1]+f'_full_a{int(a_scale[i]*1000)}.csv'))
 
     if add_final:
         print(flux.shape)

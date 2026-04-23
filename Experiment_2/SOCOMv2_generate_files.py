@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 run_fluxes = False
-run_file_generation = True
-run_plots = True
+run_file_generation = False
+run_plots = False
+repo_file_generate = True
 if run_fluxes:
     import SOCOMv2_setup_model_flux
     import SOCOMv2_setup_dataproduct_flux
@@ -15,3 +16,6 @@ if run_file_generation:
 
 if run_plots:
     import SOCOMv2_plot_model
+
+if repo_file_generate:
+    import SOCOMv2_repo_generation

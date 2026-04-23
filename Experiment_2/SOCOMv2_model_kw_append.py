@@ -151,7 +151,7 @@ for i in mod_keys:
     start_yr = 1970
     end_yr = 2022
     output_loc = os.path.join(flux_location,'models')
-    fl.calc_annual_flux(os.path.join(output_loc,mod_dictionary[i]),log,lag,start_yr,end_yr,bath_file=bath_file,flux_file = os.path.join(output_loc,mod_dictionary[i],'combined_variables.nc'),save_file = os.path.join(output_loc,mod_dictionary[i],mod_dictionary[i]+'_full_model_k.csv')
+    fl.calc_annual_flux(os.path.join(output_loc,mod_dictionary[i]),log,lag,start_yr,end_yr,land_file=bath_file,flux_file = os.path.join(output_loc,mod_dictionary[i],'combined_variables.nc'),save_file = os.path.join(output_loc,mod_dictionary[i],mod_dictionary[i]+'_full_model_k.csv')
         ,flux_var='model_flux_model_gas_transfer_2')
     del kw
     del kw_name
