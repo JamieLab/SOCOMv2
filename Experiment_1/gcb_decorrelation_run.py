@@ -30,9 +30,9 @@ model_save_loc = working_directory
 recalculated_socat_prod = ['UExP-FNN-U','JMA-MLR']
 lon,lat = du.reg_grid()
 
-du.make_folder(os.path.join(working_directory,'flux'))
-du.make_folder(os.path.join(working_directory,'plots'))
-du.make_folder(os.path.join(working_directory,'decorrelation'))
+du.makefolder(os.path.join(working_directory,'flux'))
+du.makefolder(os.path.join(working_directory,'plots'))
+du.makefolder(os.path.join(working_directory,'decorrelation'))
 
 landcci.generate_land_cci('E:/Data/Land-CCI/ESACCI-LC-L4-WB-Map-150m-P13Y-2000-v4.0.nc','E:/Data/Land-CCI/ESACCI-LC-L4-WB-Ocean-Map-150m-P13Y-2000-v4.0.tif',lon,lat,os.path.join(working_directory,'inputs','bath.nc'))
 

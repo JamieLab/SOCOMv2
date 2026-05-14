@@ -47,11 +47,11 @@ for i in g:
         ann[:,2] = ann[:,2]+0.65
         ax[0].plot(a,ann[:,2],zorder=6,linewidth=3,color=col_dir[la[-1].split('.')[0]],label=la[-1].split('.')[0]+ ' (scaled)',linestyle='-')
     elif la[-1].split('.')[0] == 'CMEMS-LSCE-FFNN':
-        ann[:,1:3] = ann[:,1:3] * (1/0.9444)
+        ann[:,1:3] = ann[:,1:3] * (1/0.9171)
         ann[:,2] = ann[:,2]+0.65
         ax[0].plot(a,ann[:,2],zorder=6,linewidth=3,color=col_dir[la[-1].split('.')[0]],label=la[-1].split('.')[0]+ ' (scaled)',linestyle='-')
     elif la[-1].split('.')[0] == 'CSIR-ML6':
-        ann[:,1:3] = ann[:,1:3] * (1/0.9619)
+        ann[:,1:3] = ann[:,1:3] * (1/0.9701)
         ann[:,2] = ann[:,2]+0.65
         ax[0].plot(a,ann[:,2],zorder=6,linewidth=3,color=col_dir[la[-1].split('.')[0]],label=la[-1].split('.')[0]+ ' (scaled)',linestyle='-')
     else:
@@ -83,7 +83,7 @@ print(m_data_unc)
 ax[1].plot(a,m_data,zorder=7,linewidth=3,color='k',linestyle ='--',label='Mean')
 ax[1].fill_between(a,m_data - m_data_unc,m_data + m_data_unc,alpha = 0.6,zorder=5,color = 'k',label='Correlated uncertainty (1 sigma)')
 ax[1].fill_between(a,m_data - m_data2_unc,m_data + m_data2_unc,alpha = 0.6,zorder=5,color = 'r',label='Independent uncertainty (1 sigma)')
-ax[1].fill_between(a,m_data - (m_data2_unc*2),m_data + (m_data2_unc*2),alpha = 0.4,zorder=5,color = 'r',label='Independent uncertainty (2 sigma)')
+# ax[1].fill_between(a,m_data - (m_data2_unc*2),m_data + (m_data2_unc*2),alpha = 0.4,zorder=5,color = 'r',label='Independent uncertainty (2 sigma)')
 ax[1].set_ylabel('Net air-sea CO$_{2}$ flux + riverine (Pg C yr$^{-1}$)')
 ax[1].set_xlabel('Year')
 ax[1].set_ylim([1,5])
