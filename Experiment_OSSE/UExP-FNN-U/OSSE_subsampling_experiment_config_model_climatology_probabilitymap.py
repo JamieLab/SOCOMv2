@@ -81,7 +81,8 @@ if __name__ == '__main__':
                     'Base+Disc':['Base+Disc','3'],
                     'Base+VOS':['Base+VOS','4'],
                     'Base+RV':['Base+RV','5'],
-                    'Base+ALL+USV':['BASE+ALL+USV','6']}
+                    'Base+ALL+USV':['BASE+ALL+USV','6'],
+                    'Base+USV':['Base+USV','7']}
     version = '1'
     start_yr = 1980
     end_yr = 2024
