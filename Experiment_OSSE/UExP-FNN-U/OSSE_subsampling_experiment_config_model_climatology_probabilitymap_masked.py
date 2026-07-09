@@ -17,7 +17,7 @@ def make_final_file(output_loc,locat,osse_no,configuration,model,version,start_y
     fco2 = du.lon_switch(np.transpose(fco2,[2,1,0]))
     lon = lon+180
 
-    file = os.path.join(output_loc,'OSSE'+osse_no+'-'+year+'_'+configuration+'_UExP-FNN-U-v'+version+'_'+model+'_'+start_yr+'-'+end_yr+'.nc')
+    file = os.path.join(output_loc,'OSSE'+osse_no+'-'+year+'_'+configuration+'_UExP-FNN-U-v'+version+'_'+model+'_'+start_yr+'-'+end_yr+'_model_masked.nc')
     outp = Dataset(file,'w',format='NETCDF4_CLASSIC')
     outp.date_created = datetime.datetime.now().strftime(('%d/%m/%Y'))
     outp.created_by = 'Daniel J. Ford (d.ford@exeter.ac.uk), Jamie D. Shutler (j.d.shutler@exeter.ac.uk) and Andrew Watson (Andrew.Watson@exeter.ac.uk)'
@@ -71,21 +71,17 @@ if __name__ == '__main__':
     UExP_loc = os.path.join(working_loc,'UExP-FNN-U'); du.makefolder(UExP_loc)
     final_output = os.path.join(UExP_loc,'final_output'); du.makefolder(final_output)
 
-    models = {'FESOM2_REcoM': 'FESOM2-REcoM',
-            'IPSL_NEMO_PISCES': 'IPSL-NEMO-PISCES',
-            'MRI_ESM2': 'MRI-ESM2',
-            #'Princeton': 'MOM6-COBALT',
-            'CESM': 'CESM-ETHZ'
-            }
+    models = {'IPSL_NEMO_PISCES': 'IPSL-NEMO-PISCES',
+            'MRI_ESM2': 'MRI-ESM2'}
 
 
     configurations = {'Base':['BASELINE','1'],
-                    'Base+ALL':['Base+ALL','2'],
-                    #'Base+Disc':['Base+Disc','3'],
-                    #'Base+VOS':['Base+VOS','4'],
-                    #'Base+RV':['Base+RV','5'],
-                    'Base+ALL+USV':['BASE+ALL+USV','6'],
-                    #'Base+USV':['Base+USV','7']
+                    # 'Base+ALL':['Base+ALL','2'],
+                    # 'Base+Disc':['Base+Disc','3'],
+                    # 'Base+VOS':['Base+VOS','4'],
+                    # 'Base+RV':['Base+RV','5'],
+                    # 'Base+ALL+USV':['BASE+ALL+USV','6'],
+                    # 'Base+USV':['Base+USV','7']
                     }
     version = '1'
     start_yr = 1980
@@ -101,7 +97,7 @@ if __name__ == '__main__':
     for con in list(configurations.keys()):
         for model in list(models.keys()):
 
-            model_save_loc = os.path.join(UExP_loc,con+'_'+model)
+            model_save_loc = os.path.join(UExP_loc,con+'_'+model+'_masked')
             if not os.path.exists(model_save_loc):
                 inps = os.path.join(model_save_loc,'inputs')
                 data_file = os.path.join(inps,'neural_network_input.nc')
@@ -116,13 +112,13 @@ if __name__ == '__main__':
                     import construct_input_netcdf as cinp
                     model_location = os.path.join(working_loc,'Truth',model)
                     #Vars should have each entry as [Extra_Name, netcdf_variable_name,data_location,produce_anomaly]
-                    vars = [['model','tos',os.path.join(model_location,'tos','%Y_%m*.nc'),1],
-                    ['model','sos',os.path.join(model_location,'sos','%Y_%m*.nc'),1],
-                    ['model','mld',os.path.join(model_location,'mld','%Y_%m*.nc'),1],
-                    ['model','chl',os.path.join(model_location,'chl','%Y_%m*.nc'),1],
+                    vars = [['model','tos',os.path.join(model_location,'tos_masked','%Y_%m*.nc'),1],
+                    ['model','sos',os.path.join(model_location,'sos_masked','%Y_%m*.nc'),1],
+                    ['model','mld',os.path.join(model_location,'mld_masked','%Y_%m*.nc'),1],
+                    ['model','chl',os.path.join(model_location,'chl_masked','%Y_%m*.nc'),1],
                     # ['model','fice',os.path.join(model_location,'fice','%Y_%m*.nc'),0],
-                    ['model_full','sfco2',os.path.join(model_location,'sfco2','%Y_%m*.nc'),0],
-                    ['model','xco2',os.path.join(model_location,'xco2','%Y_%m*.nc'),1],
+                    ['model_full','sfco2',os.path.join(model_location,'sfco2_masked','%Y_%m*.nc'),0],
+                    ['model','xco2',os.path.join(model_location,'xco2_masked','%Y_%m*.nc'),1],
 
                     ]
                     cinp.driver(data_file,vars,start_yr = start_yr,end_yr = end_yr,lon = log,lat = lag,copts={"zlib":True,})

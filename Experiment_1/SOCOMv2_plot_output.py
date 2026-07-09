@@ -12,11 +12,12 @@ import matplotlib.pyplot as plt
 working_directory = 'D:/SOCOMv2/Experiment1/GCB2025'
 g = glob.glob(os.path.join(working_directory,'*.csv'))
 fig,ax = plt.subplots(2,2,figsize=(14,14))
-fig.suptitle('SOCOMv2 Experiment 1 - '+ datetime.datetime.now().strftime('%d-%m-%Y %H:%M'))
+# fig.suptitle('SOCOMv2 Experiment 1 - '+ datetime.datetime.now().strftime('%d-%m-%Y %H:%M'))
 ax = ax.ravel()
 a = list(range(1990,2024+1))
 # col = ['tab:blue','tab:orange','tab:green','tab:purple','tab:red','tab:brown','tab:pink','tab:cyan','tab:olive']
 col = ['#332288','#44AA99','#882255','#DDCC77', '#117733', '#88CCEE','#999933','#CC6677','tab:olive']
+let = ['a','b','c','d','e','f','g','h','i','j']
 co = 0
 data = np.zeros((len(a),len(g),2))
 data[:] =np.nan
@@ -167,17 +168,19 @@ ax[3].set_ylim([1,5])
 ax[3].grid()
 ax[3].legend(fontsize=10)
 
-for i in [0,1]:
-    ax[i].set_title('fCO2sw component')
-for i in [2,3]:
-    ax[i].set_title('Gas transfer velocity')
+# for i in [0,1]:
+#     ax[i].set_title('fCO2sw component')
+# for i in [2,3]:
+#     ax[i].set_title('Gas transfer velocity')
+for i in range(len(ax)):
+    ax[i].text(0.93,1.05,f'({let[i]})',transform=ax[i].transAxes,va='top',fontweight='bold',fontsize = 18)
 plt.tight_layout()
 
 
 fig.savefig(os.path.join(working_directory,'plots/SOCOMv2_Experiment_1_1sigma_uncertainty_component.png'),format='png',dpi=300)
 
 fig,ax = plt.subplots(1,1,figsize=(7,7))
-fig.suptitle('SOCOMv2 Experiment 1 - '+ datetime.datetime.now().strftime('%d-%m-%Y %H:%M'))
+# fig.suptitle('SOCOMv2 Experiment 1 - '+ datetime.datetime.now().strftime('%d-%m-%Y %H:%M'))
 unc = np.sqrt(dd**2 + dd2**2)
 unc2 = np.sqrt(dd3**2 + dd2**2)
 print(np.mean(unc))
